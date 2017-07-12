@@ -105,12 +105,17 @@ def plot_frame(framesolns,plotdata,frameno=0,verbose=False):
     This routine checks input and then calls plotitemN for the
     proper space dimension.  Framesolns is a list of solutions at the same time
     but usually from different output directories.
+
     Some may be None if there is no output available at this time,
     but framesolns[0] is from the main outdir and should be a solution.
     """
 
     if type(framesolns) is not list:
         framesolns = [framesolns]
+
+    if framesolns[0] is None:
+        print('    Frame %i not found' % frameno)
+        return
 
     t = framesolns[0].t
 

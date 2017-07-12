@@ -214,6 +214,10 @@ class ClawPlotData(clawdata.ClawData):
 
         from clawpack.pyclaw import solution
 
+        if frameno is None:
+            print('    Frame None specified in %s' % outdir)
+            return None
+
         framesoln_dict = self.framesoln_dict
 
         if 0:
@@ -229,6 +233,11 @@ class ClawPlotData(clawdata.ClawData):
         key = (frameno, outdir)
 
         if refresh or (key not in framesoln_dict):
+
+            fortt = 'fort.t' + str(frameno).zfill(4)
+            if not os.path.isfile(os.path.join(outdir,fortt)):
+                print('    Frame %i not found in %s' % (frameno, outdir))
+                return None
 
             if self.format in [None,'ascii','binary']:
                 # check to see if outdir has a fort.b file for this frame
