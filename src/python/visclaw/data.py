@@ -540,6 +540,7 @@ class ClawPlotData(clawdata.ClawData):
         """
 
         outdir_list = []
+        frameno_map_list = []
         for figname in self._fignames:
             plotfigure = self.plotfigure_dict[figname]
             if not plotfigure._show:
@@ -558,8 +559,10 @@ class ClawPlotData(clawdata.ClawData):
                         outdir = self.outdir
                     if outdir not in outdir_list:
                         outdir_list.append(outdir)
+                        frameno_map_list.append(plotitem.frameno_map)
 
         self._outdirs = outdir_list
+        self._frameno_maps = frameno_map_list
         return self
 
 # ============================================================================
@@ -742,8 +745,11 @@ class ClawPlotItem(clawdata.ClawData):
         self.add_attribute('name',name)
         self.add_attribute('figno',plotaxes.figno)
 
-        self.add_attribute('outdir',None)              # indicates data comes from
-                                        #   self._plotdata.outdir
+        self.add_attribute('outdir',None)  # indicates data comes from
+                                           #   self._plotdata.outdir
+
+        frameno_map_id = lambda frameno: frameno   # identity map
+        self.add_attribute('frameno_map', frameno_map_id)
 
         self.add_attribute('plot_type',plot_type)
         self.add_attribute('plot_var',0)

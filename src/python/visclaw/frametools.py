@@ -68,14 +68,27 @@ def plotframe(frameno, plotdata, verbose=False, simple=False, refresh=False):
         print('*** Apparently no figures to plot')
 
     plotdata.set_outdirs()  # set _outdirs attribute to be list of
-                                      # all outdirs for all items
+                            # all outdirs for all items
+                            # and set _frameno_maps to corresponding maps
 
     framesolns = []
     # loop over all outdirs:
     if len(plotdata._outdirs) == 0:
         plotdata._outdirs = [plotdata.outdir]
-    for outdir in plotdata._outdirs:
-        framesolns.append(plotdata.getframe(frameno, outdir, refresh=refresh))
+    for k in range(len(plotdata._outdirs)):
+        outdir = plotdata._outdirs[k]
+        frameno_map = plotdata._frameno_maps[k]
+        frameno_to_get = frameno_map(frameno)   # map frameno if needed
+        # by default this is identity map, but might be different if 
+        # this outdir has different numbering of frames than main outdir
+
+        if frameno_to_get is not None:
+            framesoln = plotdata.getframe(frameno_to_get, outdir,
+                                          refresh=refresh)
+        else:
+            framesoln = None
+                                            
+        framesolns.append(framesoln)
 
 
     # It seems that 'current_data', returned from plot_frame,
@@ -92,6 +105,8 @@ def plot_frame(framesolns,plotdata,frameno=0,verbose=False):
     This routine checks input and then calls plotitemN for the
     proper space dimension.  Framesolns is a list of solutions at the same time
     but usually from different output directories.
+    Some may be None if there is no output available at this time,
+    but framesolns[0] is from the main outdir and should be a solution.
     """
 
     if type(framesolns) is not list:
@@ -192,6 +207,9 @@ def plot_frame(framesolns,plotdata,frameno=0,verbose=False):
             # for different parts of the domain (e.g. water and land).
 
             for i, framesoln in enumerate(framesolns):
+
+                if framesoln is None:
+                    continue  # go on to next i, framesoln
 
                 if abs(framesoln.t - t) > 1e-12:
                     print('*** Warning: t values do not agree for frame ',frameno)
