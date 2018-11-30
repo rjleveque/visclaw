@@ -158,6 +158,8 @@ class ClawPlotData(clawdata.ClawData):
         self.add_attribute('proc_frames', None)
         self.add_attribute('_parallel_todo', None)
 
+        # for plotting a 2d slice of 3d dataset
+        self.add_attribute('sliceno', None)
 
         self._next_FIG = 1000
         self._fignames = []
@@ -201,7 +203,7 @@ class ClawPlotData(clawdata.ClawData):
         return plotfigure
 
 
-    def getframe(self,frameno,outdir=None,refresh=False):
+    def getframe(self,frameno,outdir=None,refresh=False,sliceno=None):
         """
         ClawPlotData.getframe:
         Return an object of class Solution containing the solution
@@ -230,7 +232,17 @@ class ClawPlotData(clawdata.ClawData):
         key = (frameno, outdir)
 
         if refresh or (key not in framesoln_dict):
-            framesoln = solution.Solution(frameno,path=outdir,file_format=self.format)
+            if sliceno is None:
+                sliceno = self.sliceno # if set as ClawPlotData attribute
+            if sliceno is None:
+                framesoln = solution.Solution(frameno,path=outdir,file_format=self.format)
+            else:
+                # for 2d slice of 3d data:
+                file_prefix = 'slice_%s' % sliceno
+                print('+++ reading slice number %s' % sliceno)
+                framesoln = solution.Solution(frameno,path=outdir,
+                                              file_format=self.format,
+                                              file_prefix=file_prefix)
             if not self.save_frames:
                 framesoln_dict.clear()
             framesoln_dict[key] = framesoln
