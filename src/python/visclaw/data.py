@@ -866,6 +866,16 @@ class ClawPlotItem(clawdata.ClawData):
                 for a in amr_attributes:
                     self.add_attribute('amr_quiver_%s' % a, [])
 
+            elif plot_type == '2d_surf':
+                from clawpack.visclaw import colormaps
+                self.add_attribute('surf_cmap',colormaps.yellow_red_blue)
+                self.add_attribute('surf_cmin',None)
+                self.add_attribute('surf_cmax',None)
+                self.add_attribute('slice_normal',None)
+                self.add_attribute('slice_val',None)
+                self.celledges_show = True
+                self.patchedges_show = True
+
             else:
                  print('*** Warning 2d plot type %s not recognized' % plot_type)
 

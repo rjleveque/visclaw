@@ -32,6 +32,7 @@ from numpy import ma
 from clawpack.visclaw import colormaps
 from matplotlib.colors import Normalize
 
+from mpl_toolkits.mplot3d import Axes3D
 
 
 #==============================================================================
@@ -688,7 +689,8 @@ def plotitem2(framesoln, plotitem, current_data, stateno):
              'schlieren_cmap','schlieren_cmin', 'schlieren_cmax',
              'quiver_coarsening','quiver_var_x','quiver_var_y','quiver_key_show',
              'quiver_key_scale','quiver_key_label_x','quiver_key_label_y',
-             'quiver_key_scale','quiver_key_units','quiver_key_kwargs']
+             'quiver_key_scale','quiver_key_units','quiver_key_kwargs',
+             'slice_normal','slice_val','slice_cmap','slice_cmin','slice_cmax']
 
     pp = params_dict(plotitem, base_params, level_params,patch.level)
 
@@ -713,8 +715,18 @@ def plotitem2(framesoln, plotitem, current_data, stateno):
     if (pp['MappedGrid'] & (pp['mapc2p'] is None)):
         raise Exception("MappedGrid == True but no mapc2p specified")
     elif pp['MappedGrid']:
-        X_center, Y_center = pp['mapc2p'](xc_centers, yc_centers)
-        X_edge, Y_edge = pp['mapc2p'](xc_edges, yc_edges)
+        if pp['slice_normal'] is None:
+            # 2d mapped grid
+            X_center, Y_center = pp['mapc2p'](xc_centers, yc_centers)
+            X_edge, Y_edge = pp['mapc2p'](xc_edges, yc_edges)
+        elif pp['slice_normal'] == 'z':
+            # 2d slice of 3d grid
+            zc_centers = pp['slice_val']*np.ones(xc_centers.shape)
+            zc_edges = pp['slice_val']*np.ones(xc_edges.shape)
+            X_center, Y_center, Z_center = pp['mapc2p'](xc_centers, yc_centers, 
+                                                        zc_centers)
+            X_edge, Y_edge, Z_edge = pp['mapc2p'](xc_edges, yc_edges,
+                                                  zc_edges)
     else:
         X_center, Y_center = xc_centers, yc_centers
         X_edge, Y_edge = xc_edges, yc_edges
@@ -925,6 +937,16 @@ def plotitem2(framesoln, plotitem, current_data, stateno):
         # no plot to create (user might make one in afteritem or
         # afteraxes)
         pass
+
+    elif pp['plot_type'] == '2d_surf':
+
+        ax = plotitem._plotfigure._handle.gca(projection='3d')
+        surf_cmd = "plotitem._current_pobj = ax.plot_surface(X=X_center, " \
+                        + "Y=Y_center, Z=Z_center, " \
+                        + "cmap=pp['pcolor_cmap'])"
+                        ## + "facecolors=var, " \
+        exec(surf_cmd)
+        #import pdb; pdb.set_trace()
 
     else:
         raise ValueError("Unrecognized plot_type: %s" % pp['plot_type'])
