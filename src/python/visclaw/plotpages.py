@@ -1837,11 +1837,13 @@ def massage_frames_data(plot_pages_data):
 
     allframesfile = {}
     moviefile = {}
+    moviefile_mp4 = {}
     for figno in fignos:
         if figno not in fignames:
             fignames[figno] = 'Solution'
         allframesfile[figno] = 'allframes_fig%s.html'  % figno
         moviefile[figno] = 'movie_fig%s.html'  % figno
+        moviefile_mp4[figno] = 'movie_fig%s.mp4'  % figno
 
     numframes = len(framenos)
     numfigs = len(fignos)
@@ -1885,6 +1887,7 @@ def massage_frames_data(plot_pages_data):
     ppd._allfigsfile = allfigsfile
     ppd._allframesfile = allframesfile
     ppd._moviefile = moviefile
+    ppd._moviefile_mp4 = moviefile_mp4
     return ppd
 
 
@@ -2166,6 +2169,7 @@ def plotclaw2html(plotdata):
     allfigsfile = plotdata._allfigsfile
     allframesfile = plotdata._allframesfile
     moviefile = plotdata._moviefile
+    moviefile_mp4 = plotdata._moviefile_mp4
 
     numframes = len(framenos)
     numfigs = len(fignos)
@@ -2236,6 +2240,12 @@ def plotclaw2html(plotdata):
         for figno in fignos:
             html.write('\n   <td><a href="%s">%s</a></td>' \
                            % (moviefile[figno],fignames[figno]))
+        html.write('</tr>\n')
+    if plotdata.ffmpeg_movie:
+        html.write('<p><tr><td><b>mp4 Movies:</b></td>')
+        for figno in fignos:
+            html.write('\n   <td><a href="%s">%s</a></td>' \
+                           % (moviefile_mp4[figno],fignames[figno]))
         html.write('</tr>\n')
     if plotdata.gif_movie:
         html.write('<p><tr><td><b>gif Movies:</b></td>')
@@ -3075,7 +3085,7 @@ def plotclaw_driver(plotdata, verbose=False, format='ascii'):
                             file_name_prefix='movie_',
                             png_prefix=png_prefix,
                             figsize=None,
-                            fignos=[figno], outputs=['html'], raw_html=raw_html)
+                            fignos=[figno], outputs=['html','mp4'], raw_html=raw_html)
 
             # Note: setting figsize=None above chooses figsize with aspect
             # ratio based on .png files read in, may fit better on page
