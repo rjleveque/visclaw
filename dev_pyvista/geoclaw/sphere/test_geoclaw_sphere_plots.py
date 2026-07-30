@@ -12,6 +12,7 @@ Terminology:
 from pylab import *
 import os,sys
 from clawpack.visclaw import geoplot
+from clawpack.clawutil.util import fullpath_import
 
 # import dev_pyvista so that relative imports work:
 CLAW = os.environ['CLAW']
@@ -20,8 +21,10 @@ sys.path.insert(0, VISCLAW)
 import dev_pyvista
 sys.path.pop(0)
 
-from dev_pyvista.amrclaw import unpack_frame_patches # to unpack grid patches
 from dev_pyvista.geoclaw.util import time_str   # to convert time to HH:MM:SS
+#from dev_pyvista.amrclaw import unpack_frame_patches # to unpack grid patches
+module_path = os.path.join(CLAW,'visclaw/dev_pyvista/amrclaw/unpack_frame_patches.py')
+unpack_frame_patches = fullpath_import(module_path)
 
 
 def geoclaw_matplotlib_plot(frameno, minlevel=1, maxlevel=10,
@@ -42,7 +45,7 @@ def geoclaw_matplotlib_plot(frameno, minlevel=1, maxlevel=10,
         
     patch_iterator = unpack_frame_patches.PatchIterator(frameno, outdir=outdir,
                                                    verbose=verbose)
-    for level,X,Y,q in patch_iterator:
+    for level,patch_edges,q in patch_iterator:
 
         if level < minlevel:
             # skip to next patch
@@ -52,6 +55,8 @@ def geoclaw_matplotlib_plot(frameno, minlevel=1, maxlevel=10,
         if level > maxlevel:
             print('Not showing patches with level > %i' % maxlevel)
             break
+
+        X, Y = patch_edges[:2]
 
         extent = [X.min(), X.max(), Y.min(), Y.max()]
         if verbose:
